@@ -39,29 +39,6 @@ Depois, abra no navegador: http://localhost:8080
 mvn test
 ```
 
-## Estrutura do projeto
-
-\`\`\`
-src/main/java/com/mariana/
-├── model/
-│   ├── Celula.java
-│   ├── Tabuleiro.java
-│   ├── Jogo.java
-│   └── EstadoJogo.java
-├── controller/
-│   └── JogoController.java
-├── dto/
-│   ├── CelulaDTO.java
-│   └── JogoDTO.java
-└── App.java
-
-src/main/resources/static/
-├── index.html
-├── images/
-└── fonts/
-\`\`\`
-
-
 ## Como jogar
 
 - **Clique esquerdo** numa célula: revela
