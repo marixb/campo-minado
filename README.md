@@ -40,3 +40,31 @@ mvn test
 ```
 
 ## Estrutura do projeto
+src/main/java/com/mariana/
+├── model/
+│ ├── Celula.java
+│ ├── Tabuleiro.java
+│ ├── Jogo.java
+│ └── EstadoJogo.java
+├── controller/
+│ └── JogoController.java
+├── dto/
+│ ├── CelulaDTO.java
+│ └── JogoDTO.java
+└── App.java
+
+src/main/resources/static/
+├── index.html
+├── images/
+└── fonts/
+
+
+## Como jogar
+
+- **Clique esquerdo** numa célula: revela
+- **Clique direito**: marca/desmarca uma bandeira
+- Revele todas as células sem mina para vencer!
+
+---
+
+Feito por Mariana 🧀
