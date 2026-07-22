@@ -1,0 +1,5 @@
+com\mariana\model\Tabuleiro.class
+com\mariana\App.class
+com\mariana\model\Celula.class
+com\mariana\model\Jogo.class
+com\mariana\model\EstadoJogo.class

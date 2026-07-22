@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Campo Miado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --cell-size: 40px;
+    }
+
+    body {
+        font-family: 'Pixelify Sans', Arial, sans-serif;
+        background: #545c7e;
+        color: #e6e4d8;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px;
+    }
+
+    h1 {
+        margin-bottom: 10px;
+        letter-spacing: 2px;
+    }
+
+    #barraSuperior {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    #status {
+        font-size: 1.2em;
+        min-height: 1.5em;
+    }
+
+    #zoomBtn {
+        background: none;
+        border: none;
+        font-size: 1.5em;
+        cursor: pointer;
+        color: #eee;
+        position: relative;
+    }
+
+    #zoomBtn img {
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+    }
+
+    #zoomSliderContainer {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #333;
+        padding: 10px 14px;
+        border-radius: 6px;
+        z-index: 10;
+        white-space: nowrap;
+    }
+
+    #zoomSliderContainer.aberto {
+        display: block;
+    }
+
+    #zoomSlider {
+        width: 120px;
+    }
+
+    #tabuleiro {
+        display: grid;
+        gap: 2px;
+        background: #282328;
+        padding: 4px;
+        border-radius: 4px;
+        transition: transform 0.1s;
+    }
+
+    #tabuleiro.tremendo {
+        animation: tremer 0.4s;
+    }
+
+    @keyframes tremer {
+        0%   { transform: translate(0, 0) rotate(0deg); }
+        10%  { transform: translate(-6px, 4px) rotate(-2deg); }
+        20%  { transform: translate(6px, -4px) rotate(2deg); }
+        30%  { transform: translate(-6px, -4px) rotate(-2deg); }
+        40%  { transform: translate(6px, 4px) rotate(2deg); }
+        50%  { transform: translate(-4px, 2px) rotate(-1deg); }
+        60%  { transform: translate(4px, -2px) rotate(1deg); }
+        70%  { transform: translate(-3px, 2px) rotate(-1deg); }
+        80%  { transform: translate(3px, -2px) rotate(1deg); }
+        90%  { transform: translate(-2px, 0) rotate(0deg); }
+        100% { transform: translate(0, 0) rotate(0deg); }
+    }
+
+    .celula {
+        width: var(--cell-size);
+        height: var(--cell-size);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: calc(var(--cell-size) * 0.5);
+        cursor: pointer;
+        user-select: none;
+        border-radius: 2px;
+    }
+
+    .celula img {
+        width: 70%;
+        height: 70%;
+    }
+
+    .oculta {
+        background: #a3a29a;
+    }
+
+    .oculta:hover {
+        background: #e6e4d8;
+    }
+
+    .revelada {
+        background: #dddcd1;
+        color: #222;
+        cursor: default;
+    }
+
+    .mina {
+        background: #caa05a;
+    }
+
+    .marcada {
+        background: #c9cca1;
+    }
+
+    .num-1 { color: #1976d2; }
+    .num-2 { color: #388e3c; }
+    .num-3 { color: #d32f2f; }
+    .num-4 { color: #7b1fa2; }
+    .num-5 { color: #ff8f00; }
+    .num-6 { color: #00838f; }
+    .num-7 { color: #000; }
+    .num-8 { color: #757575; }
+
+    #novoJogo {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 1em;
+        cursor: pointer;
+        background: #1976d2;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-family: inherit;
+    }
+
+    #novoJogo:hover {
+        background: #1565c0;
+    }
+
+    body.tema-secreto {
+        background: #11100c;
+        color: #f0e6ff;
+    }
+
+    body.tema-secreto #tabuleiro {
+        background: #db351f;
+    }
+
+    body.tema-secreto .oculta {
+        background: #f2e4d0;
+    }
+
+    body.tema-secreto .oculta:hover {
+        background: #c7bbab;
+    }
+
+    body.tema-secreto .revelada {
+        background: #11100c;
+        color: #fffeff;
+    }
+
+    body.tema-secreto .marcada {
+        background: #866dff;
+    }
+
+    body.tema-secreto #novoJogo {
+        background: #db351f;
+    }
+
+    body.tema-secreto #novoJogo:hover {
+        background: #811f12;
+    }
+
+    #palavraMinado {
+    display: inline-block;
+}
+
+    #palavraMinado.tremendo-texto {
+        animation: tremerTexto 0.4s;
+    }
+
+    @keyframes tremerTexto {
+        0%   { transform: translate(0, 0) rotate(0deg); }
+        15%  { transform: translate(-3px, 1px) rotate(-3deg); }
+        30%  { transform: translate(3px, -1px) rotate(3deg); }
+        45%  { transform: translate(-3px, 1px) rotate(-3deg); }
+        60%  { transform: translate(3px, -1px) rotate(3deg); }
+        75%  { transform: translate(-2px, 0) rotate(-1deg); }
+        90%  { transform: translate(2px, 0) rotate(1deg); }
+        100% { transform: translate(0, 0) rotate(0deg); }
+    }
+</style>
+</head>
+<body>
+
+<h1>Campo <span id="palavraMinado" style="cursor: pointer;">Minado</span></h1>
+
+<div id="barraSuperior">
+    <div id="status">Carregando...</div>
+    <div style="position: relative;">
+        <button id="zoomBtn" title="Zoom"><img src="/images/lupa.png" alt="zoom"></button>
+        <div id="zoomSliderContainer">
+            <input type="range" id="zoomSlider" min="16" max="56" value="32" step="2">
+        </div>
+    </div>
+</div>
+
+<div id="tabuleiro"></div>
+<button id="novoJogo">Novo Jogo</button>
+
+<script>
+const LINHAS = 8;
+const COLUNAS = 8;
+const MINAS = 10;
+
+const tabuleiroEl = document.getElementById('tabuleiro');
+const statusEl = document.getElementById('status');
+const novoJogoBtn = document.getElementById('novoJogo');
+const zoomBtn = document.getElementById('zoomBtn');
+const zoomSliderContainer = document.getElementById('zoomSliderContainer');
+const zoomSlider = document.getElementById('zoomSlider');
+
+let jogoAcabou = false;
+let modoSecreto = false;
+const palavraMinado = document.getElementById('palavraMinado');
+
+palavraMinado.addEventListener('click', () => {
+    modoSecreto = !modoSecreto;
+    document.body.classList.toggle('tema-secreto', modoSecreto);
+    tocarSomEasterEgg();
+
+    palavraMinado.classList.remove('tremendo-texto');
+    void palavraMinado.offsetWidth; 
+    palavraMinado.classList.add('tremendo-texto');
+
+    palavraMinado.textContent = modoSecreto ? 'Miado' : 'Minado';
+
+    if (ultimoEstadoCelulas) {
+        const estadoAtual = jogoAcabou
+            ? (statusEl.textContent.includes('venceu') ? 'VITORIA' : 'DERROTA')
+            : 'EM_ANDAMENTO';
+        renderizar({ estado: estadoAtual, celulas: ultimoEstadoCelulas }, null);
+    }
+});
+
+function tocarSomEasterEgg() {
+    tocarSom(400, 0.1, 'square', 0.1);
+    setTimeout(() => tocarSom(600, 0.1, 'square', 0.1), 100);
+    setTimeout(() => tocarSom(800, 0.15, 'square', 0.12), 200);
+}
+
+zoomBtn.addEventListener('click', () => {
+    zoomSliderContainer.classList.toggle('aberto');
+});
+
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('#zoomBtn') && !e.target.closest('#zoomSliderContainer')) {
+        zoomSliderContainer.classList.remove('aberto');
+    }
+});
+
+zoomSlider.addEventListener('input', () => {
+    document.documentElement.style.setProperty('--cell-size', `${zoomSlider.value}px`);
+});
+
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function tocarSom(frequencia, duracao, tipo = 'sine', volume = 0.15) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = tipo;
+    osc.frequency.value = frequencia;
+    gain.gain.value = volume;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duracao);
+    osc.stop(audioCtx.currentTime + duracao);
+}
+
+function somClique() {
+    tocarSom(300, 0.05, 'square', 0.08);
+}
+
+function somRevelar() {
+    tocarSom(500, 0.08, 'sine', 0.12);
+}
+
+function somCascata(quantidade) {
+    for (let i = 0; i < Math.min(quantidade, 12); i++) {
+        setTimeout(() => tocarSom(400 + i * 30, 0.06, 'sine', 0.08), i * 25);
+    }
+}
+
+function somExplosao() {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.4);
+    gain.gain.value = 0.25;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.4);
+    osc.stop(audioCtx.currentTime + 0.4);
+}
+
+async function novoJogo() {
+    jogoAcabou = false;
+    tabuleiroEl.classList.remove('tremendo');
+    const resposta = await fetch(`/jogo/novo?linhas=${LINHAS}&colunas=${COLUNAS}&minas=${MINAS}`, {
+        method: 'POST'
+    });
+    const dados = await resposta.json();
+    renderizar(dados, null);
+}
+
+async function jogar(linha, coluna) {
+    if (jogoAcabou) return;
+
+    const celulaAntes = ultimoEstadoCelulas ? ultimoEstadoCelulas[linha][coluna] : null;
+    somClique();
+
+    const resposta = await fetch(`/jogo/jogar?linha=${linha}&coluna=${coluna}`, {
+        method: 'POST'
+    });
+    const dados = await resposta.json();
+    renderizar(dados, { linha, coluna, eraOculta: celulaAntes && !celulaAntes.revelada });
+}
+
+async function marcar(linha, coluna) {
+    if (jogoAcabou) return;
+    somClique();
+    const resposta = await fetch(`/jogo/marcar?linha=${linha}&coluna=${coluna}`, {
+        method: 'POST'
+    });
+    const dados = await resposta.json();
+    renderizar(dados, null);
+}
+
+let ultimoEstadoCelulas = null;
+
+function renderizar(dados, jogada) {
+    const celulasNovas = dados.celulas;
+    const linhas = celulasNovas.length;
+    const colunas = celulasNovas[0].length;
+
+    tabuleiroEl.style.gridTemplateColumns = `repeat(${colunas}, var(--cell-size))`;
+    tabuleiroEl.innerHTML = '';
+
+    let celulaClicadaEraMina = false;
+    let quantidadeReveladasAgora = 0;
+
+    for (let i = 0; i < linhas; i++) {
+        for (let j = 0; j < colunas; j++) {
+            const celula = celulasNovas[i][j];
+            const celulaAntes = ultimoEstadoCelulas ? ultimoEstadoCelulas[i][j] : null;
+            const foiReveladaAgora = celula.revelada && (!celulaAntes || !celulaAntes.revelada);
+
+            if (foiReveladaAgora) quantidadeReveladasAgora++;
+
+            const div = document.createElement('div');
+            div.classList.add('celula');
+
+            if (celula.revelada) {
+                div.classList.add('revelada');
+                if (celula.mina) {
+                    div.classList.add('mina');
+                    const imgBomba = modoSecreto ? '/images/bombasecreta.png' : '/images/bomba.png';
+                    div.innerHTML = `<img src="${imgBomba}" alt="mina">`;
+                    if (jogada && jogada.linha === i && jogada.coluna === j) {
+                        celulaClicadaEraMina = true;
+                    }
+                } else if (celula.minasVizinhas > 0) {
+                    div.classList.add(`num-${celula.minasVizinhas}`);
+                    div.textContent = celula.minasVizinhas;
+                }
+            } else if (celula.marcada) {
+                div.classList.add('marcada');
+                const imgBandeira = modoSecreto ? '/images/bandeirasecreta.png' : '/images/bandeira.png';
+                div.innerHTML = `<img src="${imgBandeira}" alt="marcada">`;
+            } else {
+                div.classList.add('oculta');
+            }
+
+            div.addEventListener('click', () => jogar(i, j));
+            div.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                marcar(i, j);
+            });
+
+            tabuleiroEl.appendChild(div);
+        }
+    }
+
+    ultimoEstadoCelulas = celulasNovas;
+
+    if (celulaClicadaEraMina) {
+        somExplosao();
+        tabuleiroEl.classList.remove('tremendo');
+        void tabuleiroEl.offsetWidth; 
+        tabuleiroEl.classList.add('tremendo');
+    } else if (quantidadeReveladasAgora > 1) {
+        somCascata(quantidadeReveladasAgora);
+    } else if (quantidadeReveladasAgora === 1) {
+        somRevelar();
+    }
+
+    atualizarStatus(dados.estado);
+}
+
+function atualizarStatus(estado) {
+    if (estado === 'VITORIA') {
+        statusEl.textContent = ' Você venceu!';
+        jogoAcabou = true;
+    } else if (estado === 'DERROTA') {
+        statusEl.textContent = ' Você perdeu!';
+        jogoAcabou = true;
+    } else {
+        statusEl.textContent = 'Jogando...';
+    }
+}
+
+novoJogoBtn.addEventListener('click', novoJogo);
+
+novoJogo();
+</script>
+
+</body>
+</html>
