@@ -21,6 +21,10 @@ Feito em Java com Spring Boot no backend e HTML/CSS/JavaScript puro no frontend.
 - JUnit 5 (testes automatizados)
 - HTML / CSS / JavaScript (Web Audio API para os sons)
 
+## Jogue agui: 
+- https://campo-miado.onrender.com 
+> o site pode levar um tempo até carregar....
+
 ## Como rodar
 
 Pré-requisitos: Java 17+ e Maven instalados.
